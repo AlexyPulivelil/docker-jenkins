@@ -26,6 +26,8 @@ pipeline {
                                 -v /var/run/docker.sock:/kaniko/docker.sock \
                                 -v /root/.docker:/kaniko/.docker \
                                 ${KANIKO_IMAGE} \
+                                pwd \
+                                 --dockerfile=Dockerfile \
                                 --destination=${DOCKER_HUB_REPO}/${imageName}
                         """
                     }
