@@ -26,8 +26,9 @@ pipeline {
                             docker run --rm \
                                 -v /var/run/docker.sock:/kaniko/docker.sock \
                                 -v /root/.docker:/kaniko/.docker \
+                                -v /docker-jenkins:/workspace \
                                 ${KANIKO_IMAGE} \
-                                --dockerfile=Dockerfile \
+                                --dockerfile=/workspace/Dockerfile \
                                 --destination=${DOCKER_HUB_REPO}/${imageName}
                         """
                     }
