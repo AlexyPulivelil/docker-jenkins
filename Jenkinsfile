@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'yourdockerhubusername'
+        DOCKER_HUB_REPO = 'techino'
         KANIKO_IMAGE = 'gcr.io/kaniko-project/executor:latest'
     }
 
