@@ -10,7 +10,7 @@ pipeline {
         stage('Pull and Build Images Locally') {
             steps {
                 script {
-                    sh 'pwd '&& ls 
+                    sh 'pwd && ls' 
                     // Define images to pull and build locally
                     def images = [
                         'postgres:latest',
