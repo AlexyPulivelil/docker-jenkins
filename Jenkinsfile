@@ -2,48 +2,52 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'techino'
+        DOCKER_HUB_REPO = 'yourdockerhubusername'
+        KANIKO_IMAGE = 'gcr.io/kaniko-project/executor:latest'
     }
 
     stages {
         stage('Pull and Build Images Locally') {
-            agent {
-                docker {
-                    image 'docker:latest'
-                    args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
             steps {
                 script {
-                    // Pull latest images
-                    docker.image('postgres:latest').pull()
-                    docker.image('redis:latest').pull()
-                    docker.image('mongo:latest').pull()
-                    docker.image('mongo-express:latest').pull()
+                    // Define images to pull and build locally
+                    def images = [
+                        'postgres:latest',
+                        'redis:latest',
+                        'mongo:latest',
+                        'mongo-express:latest'
+                    ]
 
-                    // Build images locally
-                    // docker.build('my-postgres-image', './path/to/postgres-dockerfile')
-                    // docker.build('my-redis-image', './path/to/redis-dockerfile')
-                    // docker.build('my-mongo-image', './path/to/mongo-dockerfile')
-                    // docker.build('my-mongo-express-image', './path/to/mongo-express-dockerfile')
+                    // Iterate through each image
+                    images.each { imageName ->
+                        // Pull the image using Kaniko
+                        sh """
+                            docker run --rm \
+                                -v /var/run/docker.sock:/kaniko/docker.sock \
+                                -v /root/.docker:/kaniko/.docker \
+                                ${KANIKO_IMAGE} \
+                                --dockerfile=/kaniko/Dockerfile \
+                                --destination=${DOCKER_HUB_REPO}/${imageName}
+                        """
+                    }
                 }
             }
         }
 
         stage('Push Images to Docker Hub') {
-            agent {
-                docker {
-                    image 'docker:latest'
-                    args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        docker.image("my-postgres-image").push("${DOCKER_HUB_REPO}/my-postgres-image:latest")
-                        docker.image("my-redis-image").push("${DOCKER_HUB_REPO}/my-redis-image:latest")
-                        docker.image("my-mongo-image").push("${DOCKER_HUB_REPO}/my-mongo-image:latest")
-                        docker.image("my-mongo-express-image").push("${DOCKER_HUB_REPO}/my-mongo-express-image:latest")
+                    // Iterate again through each image for pushing
+                    def images = [
+                        'postgres:latest',
+                        'redis:latest',
+                        'mongo:latest',
+                        'mongo-express:latest'
+                    ]
+
+                    // Push each image to Docker Hub
+                    images.each { imageName ->
+                        sh "docker push ${DOCKER_HUB_REPO}/${imageName}"
                     }
                 }
             }
