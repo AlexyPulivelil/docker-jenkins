@@ -10,6 +10,7 @@ pipeline {
         stage('Pull and Build Images Locally') {
             steps {
                 script {
+                    sh 'pwd'
                     // Define images to pull and build locally
                     def images = [
                         'postgres:latest',
@@ -26,7 +27,6 @@ pipeline {
                                 -v /var/run/docker.sock:/kaniko/docker.sock \
                                 -v /root/.docker:/kaniko/.docker \
                                 ${KANIKO_IMAGE} \
-                                pwd \
                                  --dockerfile=Dockerfile \
                                 --destination=${DOCKER_HUB_REPO}/${imageName}
                         """
